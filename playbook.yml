@@ -1,0 +1,39 @@
+---
+
+- name: Studying playbook
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: update all packages
+    yum:
+      name: '*'
+      state: latest
+
+  - name: install epel-release
+    yum:
+      name:
+        - epel-release
+      state: present
+
+  - name: install NTP, Nginx and repo for MySQL
+    yum:
+      name:
+        - ntp
+        - nginx
+        - https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+      state: latest
+
+  - name: install MySQL, MySQL-Python
+    yum:
+      name:
+        - MySQL-python
+        - mysql-community-server
+     state: latest
+     
+  - name: Start MySQL
+    ansible.builtin.systemd:
+      name: mysqld
+      state: started
+      enabled: yes
+
