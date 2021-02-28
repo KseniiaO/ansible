@@ -7,11 +7,15 @@ created file inven:
  node2 ansible_host=192.168.56.5 ansible_user=root ansible_ssh_private_key_file=/home/admin/.ssh/id_rsa
 
 ad-hoc to create the user:
- ansible -i inventory.txt all -m ansible.builtin.user -a 'name=new_user \
+ ansible all -m ansible.builtin.user -a 'name=new_user \
  password="$6$JqmmWUO2HX6zsiFF$CVz9g8DqLAsJAeoSH7RAK4DtZ9uMS/WlA1Hhy1mFdVmP0FNIqYrZ8wT/tyzKzGMMKfkMOFdmpxEwOufvq4oGF/"'
 
 ad-hoc to setup ssh keys for the user:
+ ansible all -m copy -a "src=/home/admin/.ssh/id_rsa.pub dest=/home/new_user/.ssh/authorized_keys mode=600"
+ or
  ansible all -m shell -a "cp -r /root/.ssh /home/new_user/"
 
 ad-hoc to add the user to sudoers:
  ansible all -m shell -a "usermod -aG wheel new_user"
+ or
+ ansilbe all -m user -a "name=new_user groups=wheel append=yes"
