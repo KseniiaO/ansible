@@ -51,7 +51,11 @@
     when: my_cnf.stat.exists==False
 
   - name: MySQL, copy my.cnf (only if it doesn't exist)
-    copy: src=/home/admin/my.cnf.j2 dest=/root/.my.cnf mode=0600
+    template:
+      src: /home/admin/templates/my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      mode: 0600
     when: my_cnf.stat.exists==False
 
   - name: restart MySQL (only after changing the password)
