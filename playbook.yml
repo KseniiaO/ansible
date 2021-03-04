@@ -1,0 +1,82 @@
+---
+
+- name: Studying playbook
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: update all packages
+    yum:
+      name: '*'
+      state: latest
+
+  - name: install epel-release
+    yum:
+      name:
+        - epel-release
+      state: present
+
+  - name: install NTP, Nginx and repo for MySQL
+    yum:
+      name:
+        - ntp
+        - nginx
+        - https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+      state: latest
+
+  - name: install MySQL, MySQL-Python
+    yum:
+      name:
+        - MySQL-python
+        - mysql-community-server
+     state: latest
+     
+  - name: Start MySQL
+    ansible.builtin.systemd:
+      name: mysqld
+      state: started
+      enabled: yes
+      
+  - name: MySQL, grab temporary password from var/log/mysqld.log
+    shell: cat /var/log/mysqld.log | grep "temporary password" | grep -oE '[^ ]+$'
+    register: tmp_pass
+
+  - name: MySQL, check if .my.cnf exists
+    stat:
+      path: /root/.my.cnf
+    register: my_cnf
+
+  - name: MySQL, set new password for root user (only if .my.cnf file doesn't exist)
+    shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ new_pass }}'');" --connect-expired-password -u root -p"{{ tmp_pass.stdout }}"'
+    when: my_cnf.stat.exists==False
+
+  - name: MySQL, copy my.cnf (only if it doesn't exist)
+    template:
+      src: /home/admin/templates/my.cnf.j2
+      dest: /root/.my.cnf
+      owner: root
+      mode: 0600
+    when: my_cnf.stat.exists==False
+
+  - name: restart MySQL (only after changing the password)
+    ansible.builtin.systemd:
+      name: mysqld
+      state: restarted
+    when: my_cnf.stat.exists==False
+
+  - name: MySQL, create a new database
+    community.mysql.mysql_db:
+      name: new_db1
+      state: present
+
+  - name: MySQL, create a user
+    community.mysql.mysql_user:
+      name: alice
+      password: blabla12
+      priv: '*.*:ALL'
+      state: present
+     
+  - name: NTP, replace ntp.conf (new servers - {0..3}.europe.pool.ntp.org)
+    copy:
+      src: /home/admin/ntp.conf
+      dest: /etc/ntp.conf
