@@ -21,7 +21,7 @@
       name:
         - ntp
         - nginx
-        - https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+        - https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
       state: latest
 
   - name: install MySQL, MySQL-Python
