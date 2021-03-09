@@ -1,0 +1,10 @@
+---
+# tasks file for ntp setup
+
+  - name: install NTP
+    yum: name=ntp state=latest
+
+  - name: replace ntp.conf 
+    copy:
+      src: ntp.conf
+      dest: /etc/ntp.conf

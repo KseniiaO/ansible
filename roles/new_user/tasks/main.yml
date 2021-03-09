@@ -1,0 +1,17 @@
+---
+# tasks file for new_user
+
+- name: create new user
+  ansible.builtin.user:
+    name: agnes
+    password: "$6$2Vb01m4zzk.LTS.k$zKS9FLu4GKkCw9xihnqLB9Xo3dMZfqWqTLLEoAUILY3qPbl7M6GiyAu2MiV7w39Y1qdWFYHG5p755ra/f8F5H0"
+    groups: wheel
+    append: yes
+
+- name: add SSH public key
+  copy:
+    src: authorized_keys
+    dest: /home/agnes/.ssh/
+    owner: agnes
+    group: agnes
+    mode: 0600
